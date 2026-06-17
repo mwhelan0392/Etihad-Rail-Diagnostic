@@ -5,551 +5,435 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Learning Ecosystem Diagnostic — Etihad Rail &amp; CRF</title>
 <style>
-  /* ============================================================
-     BRAND TOKENS
-     CRF palette is fixed. The Etihad Rail accent (--er-maroon) is
-     a sensible default — swap the two hex values below for the
-     exact Etihad Rail brand colours when you have them.
-     ============================================================ */
-  :root{
-    --crf-navy:#00053E;
-    --crf-blue:#002060;
-    --crf-gold:#D9AA00;
-    --crf-teal:#319996;
-    --er-maroon:#7A1E2E;      /* Etihad Rail accent — adjustable */
-    --er-maroon-deep:#5C1622; /* Etihad Rail accent (dark) — adjustable */
-    --ink:#1b1b28;
-    --muted:#5c6072;
-    --line:#e3e5ec;
-    --mist:#f4f5f8;
-    --paper:#ffffff;
-    --r:14px;
-    --shadow:0 10px 40px rgba(0,5,62,.10);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{
-    font-family:"Calibri","Segoe UI",system-ui,-apple-system,sans-serif;
-    color:var(--ink);
-    background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(122,30,46,.06), transparent 60%),
-      radial-gradient(1000px 500px at -10% 110%, rgba(0,5,62,.06), transparent 55%),
-      var(--mist);
-    line-height:1.5;
-    min-height:100vh;
-  }
-  .wrap{max-width:880px;margin:0 auto;padding:24px 20px 80px}
-
-  /* ---------- Co-brand header ---------- */
-  header.cobrand{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:18px;padding:18px 0 22px;flex-wrap:wrap;
-  }
-  .brand-mark{display:flex;align-items:center;gap:14px}
-  .crf-logo{
-    font-weight:700;letter-spacing:.5px;font-size:30px;color:var(--crf-navy);
-    line-height:1;
-  }
-  .crf-logo span{color:var(--crf-gold)}
-  .divider{width:1px;height:34px;background:var(--line)}
-  /* Etihad Rail logo slot — replace the contents of .er-logo with:
-     <img src="etihad-rail-logo.png" alt="Etihad Rail" style="height:34px">  */
-  .er-logo{
-    display:flex;align-items:center;gap:8px;
-    border:1px dashed var(--er-maroon);border-radius:8px;
-    padding:6px 12px;color:var(--er-maroon);font-weight:600;font-size:13px;
-    background:rgba(122,30,46,.04);
-  }
-  .er-logo small{display:block;font-weight:400;color:var(--muted);font-size:10px}
-  .kicker{
-    font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
-    color:var(--er-maroon);font-weight:600;
-  }
-
-  /* ---------- Cards / screens ---------- */
-  .screen{display:none;animation:rise .35s ease both}
-  .screen.active{display:block}
-  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  .card{
-    background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
-    box-shadow:var(--shadow);padding:34px 34px;margin-top:8px;
-  }
-  @media(max-width:560px){.card{padding:24px 20px}}
-
-  h1{font-size:30px;line-height:1.15;color:var(--crf-navy);margin-bottom:12px;font-weight:700}
-  h2{font-size:20px;color:var(--crf-navy);margin-bottom:8px;font-weight:700}
-  .lede{color:var(--muted);font-size:16px;max-width:62ch;margin-bottom:8px}
-  .accent-rule{height:4px;width:56px;background:var(--crf-gold);border-radius:3px;margin:18px 0 22px}
-
-  /* ---------- Intro detail ---------- */
-  .frame-note{
-    background:var(--mist);border-radius:10px;padding:16px 18px;margin:20px 0;
-    border-left:4px solid var(--crf-teal);font-size:14.5px;color:var(--ink);
-  }
-  .frame-note b{color:var(--crf-navy)}
-
-  /* ---------- Form fields ---------- */
-  .fields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0 4px}
-  @media(max-width:560px){.fields{grid-template-columns:1fr}}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .field.full{grid-column:1/-1}
-  label{font-size:13px;font-weight:600;color:var(--crf-navy)}
-  label .opt{font-weight:400;color:var(--muted)}
-  input,select{
-    font-family:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);
-    border-radius:9px;background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s;
-  }
-  input:focus,select:focus{outline:none;border-color:var(--crf-teal);box-shadow:0 0 0 3px rgba(49,153,150,.18)}
-
-  /* ---------- Buttons ---------- */
-  .btn{
-    font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;border:none;
-    border-radius:10px;padding:13px 26px;transition:transform .08s,filter .15s,background .15s;
-  }
-  .btn:active{transform:translateY(1px)}
-  .btn-primary{background:var(--crf-navy);color:#fff}
-  .btn-primary:hover{filter:brightness(1.15)}
-  .btn-gold{background:var(--crf-gold);color:var(--crf-navy)}
-  .btn-gold:hover{filter:brightness(1.05)}
-  .btn-ghost{background:transparent;color:var(--crf-navy);border:1px solid var(--line)}
-  .btn-ghost:hover{background:var(--mist)}
-  .btn-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:24px;flex-wrap:wrap}
-  .btn:disabled{opacity:.45;cursor:not-allowed}
-
-  /* ---------- Progress ---------- */
-  .progress-top{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-  .progress-track{flex:1;height:8px;background:var(--line);border-radius:6px;overflow:hidden}
-  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--crf-teal),var(--crf-gold));transition:width .4s ease}
-  .progress-label{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
-
-  /* ---------- Question ---------- */
-  .q-block-tag{
-    display:inline-block;font-size:12px;letter-spacing:1px;text-transform:uppercase;
-    color:var(--er-maroon);font-weight:700;margin-bottom:10px;
-  }
-  .q-statement{font-size:21px;color:var(--crf-navy);font-weight:700;line-height:1.3;margin-bottom:6px}
-  .q-help{color:var(--muted);font-size:14.5px;margin-bottom:22px}
-  .scale{display:grid;gap:10px}
-  .scale-opt{
-    display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1px solid var(--line);
-    border-radius:11px;cursor:pointer;transition:border-color .12s,background .12s;background:#fff;
-  }
-  .scale-opt:hover{border-color:var(--crf-teal);background:rgba(49,153,150,.04)}
-  .scale-opt.sel{border-color:var(--er-maroon);background:rgba(122,30,46,.05);box-shadow:0 0 0 2px rgba(122,30,46,.12)}
-  .scale-opt .num{
-    flex:0 0 30px;height:30px;border-radius:50%;background:var(--mist);color:var(--crf-navy);
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;
-  }
-  .scale-opt.sel .num{background:var(--er-maroon);color:#fff}
-  .scale-opt .txt b{display:block;color:var(--crf-navy);font-size:15.5px}
-  .scale-opt .txt span{color:var(--muted);font-size:13.5px}
-
-  /* ---------- Results ---------- */
-  .tier-badge{
-    display:inline-flex;align-items:center;gap:10px;background:var(--crf-navy);color:#fff;
-    padding:8px 18px;border-radius:30px;font-weight:700;font-size:15px;margin-bottom:18px;
-  }
-  .tier-badge .dot{width:10px;height:10px;border-radius:50%;background:var(--crf-gold)}
-  .score-big{font-size:46px;font-weight:700;color:var(--crf-navy);line-height:1}
-  .score-big small{font-size:18px;color:var(--muted);font-weight:400}
-  .bars{display:grid;gap:14px;margin:24px 0 8px}
-  .bar-row{display:grid;grid-template-columns:200px 1fr 34px;align-items:center;gap:14px}
-  @media(max-width:560px){.bar-row{grid-template-columns:1fr;gap:5px}}
-  .bar-label{font-size:14px;font-weight:600;color:var(--crf-navy)}
-  .bar-track{height:14px;background:var(--mist);border-radius:8px;overflow:hidden}
-  .bar-fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--crf-teal),var(--crf-navy));transition:width .8s cubic-bezier(.2,.7,.2,1)}
-  .bar-score{font-size:14px;font-weight:700;color:var(--crf-navy);text-align:right}
-  @media(max-width:560px){.bar-score{text-align:left}}
-
-  .commentary{display:grid;gap:14px;margin-top:8px}
-  .comment{border:1px solid var(--line);border-radius:11px;padding:16px 18px}
-  .comment h3{font-size:15px;color:var(--er-maroon);margin-bottom:4px}
-  .comment p{font-size:14.5px;color:var(--ink)}
-
-  /* ---------- Learning Matrix ---------- */
-  .matrix-wrap{margin:26px 0 6px;text-align:center}
-  .matrix-svg{max-width:420px;width:100%;height:auto;margin:0 auto;display:block}
-  .matrix-cap{font-size:13.5px;color:var(--muted);max-width:60ch;margin:14px auto 0}
-
-  .confirm{
-    background:rgba(49,153,150,.08);border:1px solid rgba(49,153,150,.3);border-radius:10px;
-    padding:14px 18px;font-size:14.5px;color:var(--crf-navy);margin-top:22px;display:flex;gap:10px;align-items:center;
-  }
-  .confirm.err{background:rgba(122,30,46,.06);border-color:rgba(122,30,46,.3);color:var(--er-maroon-deep)}
-
-  footer.legal{text-align:center;color:var(--muted);font-size:12px;margin-top:30px;line-height:1.6}
-  footer.legal b{color:var(--crf-navy)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F0F2F5;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+.shell{width:100%;max-width:740px;background:#fff;border-radius:16px;box-shadow:0 4px 32px rgba(11,31,58,0.10);overflow:hidden}
+.top-bar{background:#0B1F3A;padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.brand-group{display:flex;align-items:center;gap:14px}
+.crf-logo{font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px;font-family:Georgia,serif}
+.crf-logo span{color:#00A88A}
+.brand-divider{width:1px;height:26px;background:rgba(255,255,255,0.25)}
+/* Etihad Rail logo slot — replace the contents of .er-logo with:
+   <img src="etihad-rail-logo.png" alt="Etihad Rail" style="height:26px"> */
+.er-logo{display:flex;align-items:center;gap:7px;border:1px dashed #C8788A;border-radius:7px;padding:5px 10px;color:#fff;font-weight:600;font-size:13px;background:rgba(122,30,46,0.35)}
+.er-logo small{font-weight:400;font-size:9px;opacity:.75}
+.top-tag{font-size:12px;color:#7ca3cc;font-weight:500;text-transform:uppercase;letter-spacing:0.08em}
+.content{padding:2rem}
+.progress-wrap{margin-bottom:1.5rem}
+.progress-meta{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:6px}
+.progress-bar{background:#E8ECF0;border-radius:4px;height:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00A88A,#F5A800);border-radius:4px;transition:width 0.4s ease}
+.welcome{text-align:center;padding:1rem 0 1.5rem}
+.w-icon{width:64px;height:64px;background:#0B1F3A;border-radius:14px;margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center}
+.w-title{font-size:26px;font-weight:700;color:#0B1F3A;margin-bottom:8px}
+.w-sub{font-size:14px;color:#555;line-height:1.65;max-width:480px;margin:0 auto 1.5rem}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;text-align:left}
+.step-card{background:#F7F9FB;border:1px solid #E2E6EA;border-radius:10px;padding:0.9rem}
+.step-num{width:24px;height:24px;background:#00A88A;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.step-text{font-size:13px;color:#333;line-height:1.4;font-weight:600}
+.step-sub{font-size:12px;color:#888;margin-top:3px}
+.org-wrap{max-width:360px;margin:0 auto 0.5rem}
+.field-label{font-size:13px;font-weight:600;color:#0B1F3A;margin-bottom:6px;display:block;text-align:left}
+input[type=text]{width:100%;border:1.5px solid #D4DAE0;border-radius:8px;padding:11px 14px;font-size:14px;color:#0B1F3A;font-family:inherit}
+input[type=text]:focus{outline:none;border-color:#00A88A}
+.err{font-size:13px;color:#c0394a;margin-top:6px;display:none}
+.btn{padding:11px 24px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-teal{background:#00A88A;color:#fff}.btn-teal:hover{background:#00917a}
+.btn-navy{background:#0B1F3A;color:#fff}.btn-navy:hover{background:#0f2d52}
+.btn-navy:disabled{background:#ccc;cursor:not-allowed}
+.btn-outline{background:#fff;color:#0B1F3A;border:1.5px solid #D4DAE0}.btn-outline:hover{border-color:#0B1F3A}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem}
+.step-label{font-size:11px;font-weight:700;color:#00A88A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
+.block-title{font-size:22px;font-weight:700;color:#0B1F3A;margin-bottom:4px}
+.block-desc{font-size:14px;color:#555;line-height:1.55;margin-bottom:1.3rem}
+.q-card{background:#fff;border:1px solid #E2E6EA;border-left:4px solid #00A88A;border-radius:10px;padding:1.25rem;margin-bottom:0.5rem}
+.q-text{font-size:15px;color:#0B1F3A;font-weight:500;margin-bottom:1rem;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid #E2E6EA;border-radius:8px;cursor:pointer;transition:all 0.15s;background:#fff;user-select:none}
+.opt:hover{border-color:#00A88A;background:#f0faf7}
+.opt.sel{border-color:#00A88A;background:#e8f7f3}
+.dot{width:17px;height:17px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;margin-top:2px;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.opt.sel .dot{border-color:#00A88A;background:#00A88A}
+.opt.sel .dot::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+.opt-text{font-size:14px;color:#333;line-height:1.4}
+textarea{width:100%;border:1.5px solid #D4DAE0;border-radius:8px;padding:11px 14px;font-size:14px;font-family:inherit;resize:vertical;min-height:90px;color:#0B1F3A}
+textarea:focus{outline:none;border-color:#00A88A}
+.cellClass-high{background:#e8f7f3;border:2px solid #00A88A}.cellClass-high .mc-title{color:#007a63}.cellClass-high .mc-badge{background:#00A88A;color:#fff}
+.cellClass-med{background:#fff8e6;border:2px solid #F5A800}.cellClass-med .mc-title{color:#b07a00}.cellClass-med .mc-badge{background:#F5A800;color:#fff}
+.cellClass-low{background:#f5f5f5;border:1.5px solid #ddd}.cellClass-low .mc-title{color:#888}.cellClass-low .mc-badge{background:#e0e0e0;color:#666}
+.mc{border-radius:10px;padding:1rem}
+.mc-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.mc-desc{font-size:12px;line-height:1.4;margin-bottom:8px}
+.mc-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700}
+.matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.score-row{margin-bottom:10px}
+.score-meta{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.score-name{color:#0B1F3A;font-weight:500}
+.bar-bg{background:#E8ECF0;border-radius:4px;height:9px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease}
+.bar-high{background:#00A88A}.bar-med{background:#F5A800}.bar-low{background:#e07070}
+.narrative{background:#F7F9FB;border:1px solid #E2E6EA;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.narrative p{font-size:14px;color:#333;line-height:1.65;margin-bottom:0.7rem}
+.narrative p:last-child{margin-bottom:0}
+.insight{background:#fff;border:1px solid #E2E6EA;border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:0.75rem}
+.insight.str{border-left:4px solid #00A88A}
+.insight.gap{border-left:4px solid #e07070}
+.insight.opp{border-left:4px solid #F5A800}
+.i-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.i-type.str{color:#007a63}.i-type.gap{color:#c0394a}.i-type.opp{color:#b07a00}
+.i-text{font-size:14px;color:#333;line-height:1.55}
+.r-header{text-align:center;margin-bottom:1.5rem}
+.r-title{font-size:24px;font-weight:700;color:#0B1F3A;margin-bottom:4px}
+.r-org{font-size:13px;color:#888}
+.sec-title{font-size:16px;font-weight:700;color:#0B1F3A;padding-bottom:6px;border-bottom:2px solid #F5A800;margin-bottom:1rem;margin-top:1.5rem}
+.cta-box{background:#0B1F3A;border-radius:12px;padding:1.5rem;text-align:center;color:#fff;margin-top:1.5rem}
+.cta-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.cta-text{font-size:13px;color:#7ca3cc;margin-bottom:1.1rem;line-height:1.55}
+.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cta-btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all 0.15s}
+.cta-btn.teal{background:#00A88A;color:#fff}.cta-btn.teal:hover{background:#00917a}
+.cta-btn.ghost{background:transparent;border:1.5px solid rgba(255,255,255,0.25);color:#fff}.cta-btn.ghost:hover{background:rgba(255,255,255,0.08)}
+.submit-notice{font-size:12px;color:#00A88A;text-align:center;margin-top:1rem;min-height:18px}
+.footer{text-align:center;padding:1rem;font-size:12px;color:#aaa;border-top:1px solid #f0f0f0;margin-top:1rem}
+@media(max-width:520px){.steps-grid{grid-template-columns:1fr}.matrix-grid{grid-template-columns:1fr}.cta-btns{flex-direction:column}}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <!-- ============ CO-BRAND HEADER ============ -->
-  <header class="cobrand">
-    <div class="brand-mark">
-      <!-- CRF wordmark -->
-      <div class="crf-logo">cr<span>f</span></div>
-      <div class="divider"></div>
-      <!-- ===== ETIHAD RAIL LOGO SLOT =====
-           Replace everything inside <div class="er-logo"> ... </div> with:
-           <img src="etihad-rail-logo.png" alt="Etihad Rail" style="height:34px"> -->
-      <div class="er-logo">
-        Etihad Rail
-        <small>logo slot</small>
-      </div>
+<div class="shell">
+  <div class="top-bar">
+    <div class="brand-group">
+      <div class="crf-logo">crf<span>.</span></div>
+      <div class="brand-divider"></div>
+      <!-- ===== ETIHAD RAIL LOGO SLOT — replace as noted in the CSS comment ===== -->
+      <div class="er-logo">Etihad Rail<small>logo slot</small></div>
     </div>
-    <div class="kicker">Learning Ecosystem Diagnostic</div>
-  </header>
-
-  <!-- ============ SCREEN 1: INTRO ============ -->
-  <section class="screen active" id="screen-intro">
-    <div class="card">
-      <h1>How effective is your learning ecosystem?</h1>
-      <div class="accent-rule"></div>
-      <p class="lede">This short self-assessment helps you judge how well learning is connected to performance across Etihad Rail. It takes about five minutes.</p>
-
-      <div class="frame-note">
-        It is built on CRF's research, <b>Creating an Effective Learning Ecosystem</b>. You will rate your organisation against the seven building blocks that, working together, move learning beyond courses and content towards measurable business impact. Your individual result appears on screen at the end; your responses are also pooled to build a collective picture across Etihad Rail.
-      </div>
-
-      <div class="fields">
-        <div class="field">
-          <label>Your name <span class="opt">(optional)</span></label>
-          <input id="in-name" type="text" placeholder="e.g. Sara Al Mansoori" autocomplete="off">
-        </div>
-        <div class="field">
-          <label>Function or team <span class="opt">(optional)</span></label>
-          <input id="in-func" type="text" placeholder="e.g. HR, Operations, Engineering" autocomplete="off">
-        </div>
-        <div class="field full">
-          <label>Email <span class="opt">(optional)</span></label>
-          <input id="in-email" type="email" placeholder="name@etihadrail.ae" autocomplete="off">
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <span style="font-size:13px;color:var(--muted)">7 questions · 5 minutes</span>
-        <button class="btn btn-primary" onclick="startDiagnostic()">Start the diagnostic</button>
-      </div>
+    <div class="top-tag">Learning Ecosystem Diagnostic</div>
+  </div>
+  <div class="content">
+    <div id="progress-wrap" class="progress-wrap" style="display:none">
+      <div class="progress-meta"><span id="prog-label"></span><span id="prog-pct"></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
     </div>
-  </section>
-
-  <!-- ============ SCREEN 2: QUESTIONS ============ -->
-  <section class="screen" id="screen-q">
-    <div class="card">
-      <div class="progress-top">
-        <div class="progress-track"><div class="progress-fill" id="prog"></div></div>
-        <div class="progress-label" id="prog-label">1 of 7</div>
-      </div>
-      <div class="q-block-tag" id="q-tag">Building block</div>
-      <div class="q-statement" id="q-statement">Statement</div>
-      <div class="q-help" id="q-help">Choose the option that best reflects where Etihad Rail is today.</div>
-      <div class="scale" id="scale"></div>
-      <div class="btn-row">
-        <button class="btn btn-ghost" id="btn-back" onclick="prevQ()">Back</button>
-        <button class="btn btn-gold" id="btn-next" onclick="nextQ()" disabled>Next</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ SCREEN 3: RESULTS ============ -->
-  <section class="screen" id="screen-result">
-    <div class="card">
-      <div class="tier-badge"><span class="dot"></span><span id="tier-name">Result</span></div>
-      <h2>Your learning ecosystem profile</h2>
-      <p style="color:var(--muted);font-size:15px;margin-top:4px">Overall maturity</p>
-      <div class="score-big" id="overall-score">0.0<small> / 5.0</small></div>
-
-      <div class="bars" id="bars"></div>
-
-      <h2 style="margin-top:30px">Where to focus next</h2>
-      <div class="accent-rule"></div>
-      <div class="commentary" id="commentary"></div>
-
-      <div class="matrix-wrap">
-        <h2>The lens: CRF Learning Matrix</h2>
-        <p class="matrix-cap" style="margin-bottom:16px">An effective ecosystem balances learning that improves <b>existing</b> performance with learning that builds <b>new</b> capability — across both individuals and the collective organisation.</p>
-        <svg class="matrix-svg" viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CRF Learning Matrix: productive versus generative purpose, individual versus collective scope">
-          <!-- quadrants -->
-          <rect x="60" y="20" width="150" height="130" fill="#eef4f4" stroke="#cfe0df"/>
-          <rect x="210" y="20" width="150" height="130" fill="#e9f0f6" stroke="#cdd9e6"/>
-          <rect x="60" y="150" width="150" height="130" fill="#f5eef1" stroke="#e3cdd5"/>
-          <rect x="210" y="150" width="150" height="130" fill="#faf3df" stroke="#ecdca6"/>
-          <!-- quadrant labels -->
-          <text x="135" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Individual ·</text>
-          <text x="135" y="95" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Productive</text>
-          <text x="135" y="112" text-anchor="middle" font-size="9" fill="#5c6072">Skills for today's role</text>
-          <text x="285" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Individual ·</text>
-          <text x="285" y="95" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Generative</text>
-          <text x="285" y="112" text-anchor="middle" font-size="9" fill="#5c6072">New personal capability</text>
-          <text x="135" y="210" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Collective ·</text>
-          <text x="135" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Productive</text>
-          <text x="135" y="242" text-anchor="middle" font-size="9" fill="#5c6072">Scaling what works</text>
-          <text x="285" y="210" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Collective ·</text>
-          <text x="285" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="#00053E">Generative</text>
-          <text x="285" y="242" text-anchor="middle" font-size="9" fill="#5c6072">New shared capability</text>
-          <!-- axes -->
-          <text x="210" y="14" text-anchor="middle" font-size="10" font-weight="700" fill="#7A1E2E">PURPOSE  →  Productive  |  Generative</text>
-          <text x="20" y="155" text-anchor="middle" font-size="10" font-weight="700" fill="#7A1E2E" transform="rotate(-90 20 155)">SCOPE  →  Individual  |  Collective</text>
-        </svg>
-      </div>
-
-      <div class="confirm" id="confirm-box">
-        <span>✓</span><span id="confirm-text">Your response has been recorded for the Etihad Rail collective view.</span>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-ghost" onclick="restart()">Start again</button>
-        <button class="btn btn-primary" onclick="window.print()">Save / print my result</button>
-      </div>
-    </div>
-
-    <footer class="legal">
-      <b>Etihad Rail × CRF</b> — Learning Ecosystem Diagnostic<br>
-      Framework © Corporate Research Forum, <i>Creating an Effective Learning Ecosystem</i> (2026)
-    </footer>
-  </section>
-
+    <div id="main"></div>
+  </div>
+  <div class="footer">Etihad Rail &times; Corporate Research Forum &nbsp;·&nbsp; Based on <em>Creating an Effective Learning Ecosystem</em>, CRF 2026</div>
 </div>
-
 <script>
 /* ============================================================
-   CONFIGURATION
-   Paste your NEW Google Apps Script web app URL between the quotes
-   below once you have deployed it for the Etihad Rail sheet.
-   Leave it as "" to run the tool without sending data anywhere.
+   Paste your NEW Google Apps Script /exec URL between the quotes.
+   Leave it as '' to run the tool without sending data anywhere.
    ============================================================ */
-var WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzTq5ncMRybE7NeQjkqjM9eHukNN85og5eXQGCrKfyFCylMngbr2HGZiBI3uiiksqo9/exec";
+const WEBHOOK='https://script.google.com/macros/s/AKfycbz1l0M08cxYkDpsMlkJ3HUQuk8U4wXJPQn_-v-CIAbmd8TEyuR8_m52WVGOwPdfp29P/exec';
 
-/* ---------- The seven building blocks ---------- */
-var QUESTIONS = [
-  {
-    block:"Aligning with the Business",
-    statement:"Our learning priorities are driven by business strategy and a small number of critical capabilities.",
-    help:"Rather than a broad catalogue of courses and content available to everyone.",
-    low:"Learning is largely demand-led and disconnected from a clear set of business priorities. A good first step is agreeing the few capabilities that matter most for Etihad Rail's strategy.",
-    mid:"Some learning is tied to strategy, but priorities are not yet sharp or consistently governed. Tightening the link between strategy and a short list of critical capabilities would raise impact.",
-    high:"Learning effort is focused on the capabilities that matter most for strategy, with clear governance. Protect this by revisiting priorities as the strategy evolves."
-  },
-  {
-    block:"Demonstrating Impact",
-    statement:"We use evidence and data to shape learning decisions and can show how learning improves performance.",
-    help:"Beyond tracking attendance, completions and satisfaction scores.",
-    low:"Measurement focuses on activity rather than outcomes. Begin by defining what better performance looks like before designing the intervention.",
-    mid:"You capture some outcome data, but it is not yet driving decisions or building credibility with the business. Connecting priorities, interventions and outcomes is the next move.",
-    high:"Evidence shapes decisions from the outset and you can demonstrate impact. Use this credibility to influence wider investment decisions."
-  },
-  {
-    block:"Connecting to Work",
-    statement:"Learning is connected to how work is actually done — informed by workforce planning, job design and critical skills.",
-    help:"Rather than sitting apart from the flow of real work.",
-    low:"Learning is mostly delivered away from work, with little link to workforce or skills planning. Getting closer to where work happens and where it breaks down will sharpen relevance.",
-    mid:"There are some links to work and skills, but they are not systematic. A clearer view of critical skills and how roles are changing would strengthen the connection.",
-    high:"Learning is closely connected to work, skills and workforce planning. Keep refreshing your skills picture as roles and technology shift."
-  },
-  {
-    block:"Designing the Learning Experience",
-    statement:"Our learning is designed around how adults actually learn, applying learning science in practice.",
-    help:"Rather than defaulting to content delivery and one-off events.",
-    low:"Design defaults to courses and content. Applying a few core principles of how adults learn would make experiences stick.",
-    mid:"Some design draws on learning science, but it is inconsistent. Embedding spacing, practice and application more deliberately would lift effectiveness.",
-    high:"Experiences are designed around how adults learn, with practice and application built in. Continue to test and refine your design approach."
-  },
-  {
-    block:"Creating the Learning Environment",
-    statement:"Leaders, managers and HR actively reinforce learning and support behaviour change beyond the programme.",
-    help:"So that learning translates into changed behaviour at work.",
-    low:"Learning is seen mainly as HR's responsibility and rarely reinforced by managers. Engaging leaders as visible sponsors is a high-leverage starting point.",
-    mid:"Some leaders reinforce learning, but it is patchy and the focus is not consistently on behaviour change. Clarifying the roles of leaders, learners and HR would help.",
-    high:"Leaders and managers actively reinforce learning and the environment supports behaviour change. Sustain this through visible executive sponsorship and peer accountability."
-  },
-  {
-    block:"Applying Technology and AI",
-    statement:"We use technology and AI deliberately to enable learning and performance, with L&D central to adoption.",
-    help:"Rather than leaving design and rollout of these tools to IT alone.",
-    low:"Technology and AI are used minimally, or driven elsewhere without L&D involvement. Identifying one or two clear opportunities is a practical entry point.",
-    mid:"You are starting to apply technology and AI, but not yet as a coherent enabler of performance. Putting L&D at the centre of adoption would unlock more value.",
-    high:"Technology and AI are applied deliberately to enable learning and performance, with L&D central to adoption. Keep guarding against fragmentation as tools proliferate."
-  },
-  {
-    block:"Integrating Talent Practices",
-    statement:"Learning is integrated across the talent lifecycle and connected to performance and development.",
-    help:"Rather than operating in isolation from hiring, performance and progression.",
-    low:"Learning operates separately from other talent practices. Linking it to performance and development conversations is a strong first connection.",
-    mid:"There are some links to the talent lifecycle, but they are not joined up. Integrating learning across hiring, performance and progression would compound its effect.",
-    high:"Learning is integrated across the talent lifecycle and tied to performance and development. Keep these connections live as talent processes evolve."
-  }
+const BLOCKS=[
+  {id:'align',name:'Aligning with the Business',desc:'How well does learning connect to your organisation\'s strategic priorities and business outcomes?',
+   questions:[
+    {q:'How clearly is your learning agenda shaped by your organisation\'s strategic priorities?',
+     opts:[{t:'We respond to requests as they come from business leaders — learning is mostly demand-led',s:1},{t:'We have some alignment but it\'s informal and inconsistent',s:2},{t:'We have a learning philosophy that connects to strategy',s:3},{t:'Learning priorities flow directly from strategic capability gaps with clear governance',s:4}]},
+    {q:'How would you describe the relationship between L&D and senior business leaders?',
+     opts:[{t:'L&D is seen primarily as a training provider or support function',s:1},{t:'We have some senior champions but limited strategic influence',s:2},{t:'We have a "seat at the table" so can make a contribution',s:3},{t:'We co-create strategy with leaders and shape capability priorities at the top',s:4}]}
+  ]},
+  {id:'impact',name:'Demonstrating Impact',desc:'How effectively does your organisation measure and communicate the value of learning investments?',
+   questions:[
+    {q:'How do you currently measure the impact of learning in your organisation?',
+     opts:[{t:'We track completions and satisfaction scores',s:1},{t:'We measure some behaviour change but it\'s not systematic',s:2},{t:'We link learning to performance metrics for key programmes',s:3},{t:'We use data to demonstrate clear links between learning and business outcomes',s:4}]},
+    {q:'How confident are you in making the case for learning investment to senior leadership?',
+     opts:[{t:'Not confident — we struggle to quantify value',s:1},{t:'Somewhat confident with qualitative evidence and stories',s:2},{t:'Fairly confident with a mix of data and case studies',s:3},{t:'Very confident — we have robust metrics that resonate with the business',s:4}]}
+  ]},
+  {id:'work',name:'Connecting to Work',desc:'How closely is learning tied to actual work, skills requirements, and workforce planning?',
+   questions:[
+    {q:'How well does your learning offer reflect what people actually need to perform in their roles?',
+     opts:[{t:'We offer a broad catalogue — people self-select what seems relevant',s:1},{t:'We do some needs analysis but it\'s periodic and not always acted on',s:2},{t:'We have structured skills frameworks that inform our learning priorities',s:3},{t:'Learning is tightly integrated with workforce planning and role-based capability needs',s:4}]},
+    {q:'To what extent does learning happen at the point of need, embedded in work?',
+     opts:[{t:'Most learning is off-the-job — classroom or e-learning modules',s:1},{t:'We have some performance support tools but they\'re not widely used',s:2},{t:'We consciously design for on-the-job application and transfer',s:3},{t:'Learning is embedded in workflows, projects, and day-to-day practice',s:4}]}
+  ]},
+  {id:'design',name:'Designing the Learning Experience',desc:'How effectively do you apply learning science and design principles to your programmes?',
+   questions:[
+    {q:'How would you describe the primary format of learning in your organisation?',
+     opts:[{t:'Predominantly e-learning modules and classroom training',s:1},{t:'A mix of formal and informal, but not always by design',s:2},{t:'We select the best method based on the learning outcome required',s:3},{t:'We consistently apply an evidence-based approach to design: spaced practice, retrieval, social, experiential',s:4}]},
+    {q:'How much do learners apply what they\'ve learned back in the workplace?',
+     opts:[{t:'Rarely — there\'s limited follow-through after programmes and we don\'t track it',s:1},{t:'Sometimes — dependent on the manager and the individual',s:2},{t:'Mostly — we build in application tasks and follow-up',s:3},{t:'Consistently — application is designed in from the start with clear transfer mechanisms and a process for evaluation',s:4}]}
+  ]},
+  {id:'env',name:'Creating the Learning Environment',desc:'How supportive is your organisation\'s culture and leadership of continuous learning?',
+   questions:[
+    {q:'How would you describe the learning culture in your organisation?',
+     opts:[{t:'Learning is seen as something that happens in formal training events',s:1},{t:'There\'s appetite for learning but it\'s not consistently reinforced',s:2},{t:'Leaders actively support and role-model learning',s:3},{t:'Continuous learning is embedded in how we work — psychologically safe, leadership-led and connected to career progression',s:4}]},
+    {q:'How do managers support their team\'s development day-to-day?',
+     opts:[{t:'Most managers see development as HR\'s responsibility',s:1},{t:'Some managers are great but practice is inconsistent',s:2},{t:'Managers are expected and equipped to hold development conversations and enable actions',s:3},{t:'Managers regularly coach, stretch, and create learning opportunities for their teams',s:4}]}
+  ]},
+  {id:'tech',name:'Applying Technology & AI',desc:'How effectively does your organisation leverage technology and AI to enhance learning?',
+   questions:[
+    {q:'How would you describe your use of technology to support learning?',
+     opts:[{t:'We have an LMS mainly for compliance tracking — primarily administrative',s:1},{t:'We use digital tools but they\'re not well integrated or widely adopted',s:2},{t:'Technology enhances our offer — personalised, accessible, data-informed',s:3},{t:'AI and technology are reshaping how learning happens across the organisation',s:4}]},
+    {q:'How are you approaching AI in your learning function?',
+     opts:[{t:'We\'re watching developments but haven\'t made meaningful changes yet',s:1},{t:'We\'re experimenting with AI for content creation and efficiency',s:2},{t:'AI is part of our technology strategy with clear use cases defined',s:3},{t:'AI is integrated into how we personalise, assess, and deliver learning at scale',s:4}]}
+  ]},
+  {id:'talent',name:'Integrating Talent Practices',desc:'How well is learning connected to your broader talent management and HR processes?',
+   questions:[
+    {q:'How integrated is learning with your performance and talent processes?',
+     opts:[{t:'Learning and performance conversations happen in separate silos',s:1},{t:'There\'s some connection at annual review but it\'s loose and inconsistent',s:2},{t:'Learning priorities are informed by performance data and talent reviews',s:3},{t:'Continuous learning is fully embedded across the talent lifecycle — onboarding to succession',s:4}]},
+    {q:'How does your organisation approach building capability for future skills needs?',
+     opts:[{t:'We react to skills gaps when they become visible',s:1},{t:'We do some workforce planning but it doesn\'t consistently drive learning',s:2},{t:'We have a strategic workforce plan that informs our capability development agenda',s:3},{t:'Reskilling and future capability building are central to our people strategy and reviewed regularly',s:4}]}
+  ]}
 ];
 
-/* ---------- Maturity scale ---------- */
-var SCALE = [
-  {n:1, label:"Not yet",    desc:"This is not in place today."},
-  {n:2, label:"Early",      desc:"Some early signs, but not consistent."},
-  {n:3, label:"Developing", desc:"In place in parts, with gaps."},
-  {n:4, label:"Strong",     desc:"Largely in place and working well."},
-  {n:5, label:"Embedded",   desc:"Fully embedded and sustained."}
+const MATRIX_QS=[
+  {id:'ip',q:'How much does your learning focus on <strong>individuals improving performance in existing roles</strong>? (e.g. role skills training, job-specific e-learning, coaching for role effectiveness)',
+   opts:[{t:'Very little — we do minimal individual skills training',s:1},{t:'Some, but patchy and not systematic',s:2},{t:'Moderate — part of our offer but not the main focus',s:3},{t:'High — most of our investment is in individual role performance',s:4}]},
+  {id:'ig',q:'How much does your learning help <strong>individuals develop new capabilities, ideas, or strategies</strong>? (e.g. critical thinking, innovation skills, design thinking, strategic modelling)',
+   opts:[{t:'Very little — we rarely focus on developing skills beyond their day job',s:1},{t:'Ad hoc — happens through some development activity but not by design',s:2},{t:'Growing — we have some programmes focused on this',s:3},{t:'Strong — we deliberately invest in individual generative capability',s:4}]},
+  {id:'op',q:'How much learning focuses on <strong>teams improving collective efficiency or productivity</strong>? (e.g. after-action reviews, team-based training, continuous improvement methods, digital skills)',
+   opts:[{t:'Very little — we focus on individuals not teams',s:1},{t:'Some team learning but occasional and unplanned',s:2},{t:'Regular — team learning is part of our core offer',s:3},{t:'Significant — team-based learning is a key strategic priority',s:4}]},
+  {id:'og',q:'How much focus is there on <strong>organisation-wide learning to develop new solutions and challenge assumptions</strong>? (e.g. strategy jams, action learning, co-creation, problem labs)',
+   opts:[{t:'Almost none — we don\'t do this type of learning',s:1},{t:'Occasional — it happens but not by design',s:2},{t:'Growing — some deliberate initiatives here but ad hoc',s:3},{t:'Strong — this is central to our learning strategy',s:4}]}
 ];
 
-/* ---------- Maturity tiers ---------- */
-function tierFor(avg){
-  if(avg < 2)   return "Nascent ecosystem";
-  if(avg < 3)   return "Emerging ecosystem";
-  if(avg < 4)   return "Established ecosystem";
-  if(avg < 4.5) return "Advanced ecosystem";
-  return "Embedded ecosystem";
+let S={screen:'welcome',org:'',context:'',blockIdx:0,qIdx:0,matQIdx:0,ans:{},matAns:{}};
+
+function setProgress(label,p){
+  document.getElementById('progress-wrap').style.display='block';
+  document.getElementById('prog-label').textContent=label;
+  document.getElementById('prog-pct').textContent=p+'%';
+  document.getElementById('prog-fill').style.width=p+'%';
+}
+function hideProgress(){document.getElementById('progress-wrap').style.display='none';}
+
+function render(){
+  const m=document.getElementById('main');
+  if(S.screen==='welcome'){hideProgress();m.innerHTML=welcomeHTML();}
+  else if(S.screen==='context'){setProgress('Step 1 of 3 — Your context',8);m.innerHTML=contextHTML();}
+  else if(S.screen==='matrix'){
+    const p=Math.round(((S.matQIdx+1)/MATRIX_QS.length)*100);
+    setProgress('Step 2 of 3 — CRF Learning Matrix ('+(S.matQIdx+1)+' of '+MATRIX_QS.length+')',8+Math.round(p*0.25));
+    m.innerHTML=matrixHTML();
+  } else if(S.screen==='questions'){
+    const done=BLOCKS.slice(0,S.blockIdx).reduce((a,b)=>a+b.questions.length,0)+S.qIdx;
+    const total=BLOCKS.reduce((a,b)=>a+b.questions.length,0);
+    setProgress('Step 3 of 3 — Building Block '+(S.blockIdx+1)+' of 7: '+BLOCKS[S.blockIdx].name,33+Math.round(((done+1)/total)*60));
+    m.innerHTML=questionsHTML();
+  } else if(S.screen==='results'){setProgress('Diagnostic complete',100);m.innerHTML=resultsHTML();}
+  attachListeners();
 }
 
-/* ---------- State ---------- */
-var answers = new Array(QUESTIONS.length).fill(null);
-var current = 0;
-
-function startDiagnostic(){
-  showScreen("screen-q");
-  current = 0;
-  renderQ();
+function welcomeHTML(){
+  return `<div class="welcome">
+    <div class="w-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"><polygon points="15,4 28,24 2,24" fill="rgba(255,255,255,0.9)"/><circle cx="15" cy="18" r="3.5" fill="#00A88A"/></svg></div>
+    <div class="w-title">Learning Ecosystem Diagnostic</div>
+    <div class="w-sub">A practical self-assessment grounded in CRF's research. Understand where learning across Etihad Rail stands today — and where to focus next.</div>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><div class="step-text">Map your learning activity</div><div class="step-sub">Against the CRF Learning Matrix</div></div>
+      <div class="step-card"><div class="step-num">2</div><div class="step-text">Rate 7 ecosystem dimensions</div><div class="step-sub">14 questions — approx. 5 mins</div></div>
+      <div class="step-card"><div class="step-num">3</div><div class="step-text">Receive your diagnostic</div><div class="step-sub">Strengths, gaps & priorities</div></div>
+    </div>
+    <div class="org-wrap">
+      <label class="field-label">Your name or team</label>
+      <input type="text" id="orgName" placeholder="e.g. HR, Operations, Engineering..." value="${S.org}">
+      <div class="err" id="orgErr">Please enter your name or team to continue.</div>
+    </div>
+    <button class="btn btn-teal" id="startBtn" style="margin-top:1rem">Begin Diagnostic →</button>
+  </div>`
 }
 
-function renderQ(){
-  var q = QUESTIONS[current];
-  document.getElementById("q-tag").textContent = q.block;
-  document.getElementById("q-statement").textContent = q.statement;
-  document.getElementById("q-help").textContent = q.help;
+function contextHTML(){
+  return `<div>
+    <div class="step-label">Getting started</div>
+    <div class="block-title">Your learning context</div>
+    <div class="block-desc">Briefly describe the 1–2 biggest learning or capability challenges your part of Etihad Rail is facing right now. This is optional but helps contextualise your results.</div>
+    <div class="q-card">
+      <div class="q-text">What are your most pressing learning and capability challenges?</div>
+      <textarea id="ctxInput" placeholder="e.g. We're scaling the network rapidly and need to build technical and leadership capability at pace...">${S.context}</textarea>
+    </div>
+    <div class="nav">
+      <button class="btn btn-outline" id="backBtn">← Back</button>
+      <button class="btn btn-navy" id="nextBtn">Next: Learning Matrix →</button>
+    </div>
+  </div>`
+}
 
-  var pct = ((current) / QUESTIONS.length) * 100;
-  document.getElementById("prog").style.width = pct + "%";
-  document.getElementById("prog-label").textContent = (current+1) + " of " + QUESTIONS.length;
+function matrixHTML(){
+  const q=MATRIX_QS[S.matQIdx];
+  return `<div>
+    <div class="step-label">CRF Learning Matrix — Question ${S.matQIdx+1} of ${MATRIX_QS.length}</div>
+    <div class="block-title">Where does your learning focus sit?</div>
+    <div class="block-desc">The CRF Learning Matrix maps activity across two dimensions: <strong>purpose</strong> (productive vs. generative) and <strong>scope</strong> (individual vs. organisational).</div>
+    <div class="q-card">
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.opts.map(o=>`<div class="opt${S.matAns[q.id]===o.s?' sel':''}" data-mat="${q.id}" data-s="${o.s}">
+          <div class="dot"></div><div class="opt-text">${o.t}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-outline" id="backBtn">← Back</button>
+      <button class="btn btn-navy" id="nextBtn" ${S.matAns[q.id]==null?'disabled':''}>Next →</button>
+    </div>
+  </div>`
+}
 
-  var scale = document.getElementById("scale");
-  scale.innerHTML = "";
-  SCALE.forEach(function(s){
-    var div = document.createElement("div");
-    div.className = "scale-opt" + (answers[current] === s.n ? " sel" : "");
-    div.onclick = function(){ selectAnswer(s.n); };
-    div.innerHTML = '<div class="num">'+s.n+'</div><div class="txt"><b>'+s.label+'</b><span>'+s.desc+'</span></div>';
-    scale.appendChild(div);
+function questionsHTML(){
+  const block=BLOCKS[S.blockIdx];
+  const q=block.questions[S.qIdx];
+  const key=`${block.id}_${S.qIdx}`;
+  const isLast=S.blockIdx===BLOCKS.length-1&&S.qIdx===block.questions.length-1;
+  return `<div>
+    <div class="step-label">Building block ${S.blockIdx+1} of 7</div>
+    <div class="block-title">${block.name}</div>
+    <div class="block-desc">${block.desc}</div>
+    <div class="q-card">
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.opts.map(o=>`<div class="opt${S.ans[key]===o.s?' sel':''}" data-key="${key}" data-s="${o.s}">
+          <div class="dot"></div><div class="opt-text">${o.t}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-outline" id="backBtn">← Back</button>
+      <button class="btn btn-navy" id="nextBtn" ${S.ans[key]==null?'disabled':''}>${isLast?'Generate My Diagnostic ✦':'Next →'}</button>
+    </div>
+  </div>`
+}
+
+function cellCls(s){return s>=3?'cellClass-high':s>=2?'cellClass-med':'cellClass-low'}
+function cellBadge(s){return s>=3?'High focus':s>=2?'Moderate':'Under-invested'}
+function barCls(p){return p>=65?'bar-high':p>=40?'bar-med':'bar-low'}
+
+function generateInsights(blockScores,matScores){
+  const sorted=[...blockScores].sort((a,b)=>b.avg-a.avg);
+  const top=sorted.slice(0,2);
+  const bottom=sorted.slice(-2);
+  const genAvg=(matScores.ig+matScores.og)/2;
+  const prodAvg=(matScores.ip+matScores.op)/2;
+  const orgAvg=(matScores.op+matScores.og)/2;
+  const indAvg=(matScores.ip+matScores.ig)/2;
+  const overallAvg=blockScores.reduce((a,b)=>a+b.avg,0)/blockScores.length;
+  let matPattern='';
+  if(genAvg<2&&prodAvg>=2.5) matPattern='Your learning activity is predominantly productive — focused on improving existing performance. While this builds reliable execution, CRF\'s research shows the greatest strategic value often lies in generative learning: developing new solutions and capabilities for future challenges.';
+  else if(orgAvg<2&&indAvg>=2.5) matPattern='Your learning investment is strongly individual-focused. Building in more team and organisational-level learning — through action learning, co-creation, or peer problem-solving — could unlock collective capability that individual programmes alone cannot deliver.';
+  else if(genAvg>=3&&orgAvg>=3) matPattern='Your Learning Matrix profile is notably strong — you are investing across all four quadrants, including the higher-value generative and organisational dimensions. This positions your function to build adaptive capability, not just maintain current performance.';
+  else matPattern='Your Learning Matrix profile shows a mixed picture. The most strategically underinvested quadrant for most organisations is Organisational / Generative — using collective intelligence to develop new solutions. CRF\'s research points to this as the greatest source of untapped value for most L&D functions.';
+  let narrative='';
+  if(overallAvg>=3.2) narrative=`<p>${S.org}'s learning ecosystem is operating at a high level across most dimensions. Your responses indicate a function that is genuinely connected to business strategy, investing in evidence-led prioritisation, and building capability that goes beyond compliance and course completion.</p><p>${matPattern}</p><p>Your primary opportunity is to sustain this performance while continuing to push into the higher-value quadrants of the Learning Matrix — ensuring that generative and organisational-level learning are as intentional and resourced as your individual development offer.</p>`;
+  else if(overallAvg>=2.3) narrative=`<p>${S.org}'s learning ecosystem shows real capability in several dimensions, alongside clear opportunities to increase strategic impact. Your responses suggest a function that is moving in the right direction — but may still be perceived by the business more as a training provider than a strategic partner.</p><p>${matPattern}</p><p>CRF's research shows the most influential learning functions make one critical shift: from "what learning should we offer?" to "what must this organisation get better at to deliver its strategy?" The building blocks where you score lower are likely holding back that repositioning.</p>`;
+  else narrative=`<p>${S.org}'s learning ecosystem is in an early stage of development. Your responses suggest a function that is predominantly reactive and activity-focused — where learning is measured by volume and completion rather than capability change or business outcomes.</p><p>${matPattern}</p><p>This is not unusual — CRF's research found that many L&D functions are still primarily seen as a support service rather than a strategic lever. The path forward is well-evidenced: build alignment with one or two senior business leaders, define a clear learning philosophy, and focus on a small number of capabilities that genuinely matter to the strategy.</p>`;
+  const insights=[];
+  top.forEach(b=>{if(b.avg>=3) insights.push({type:'str',text:`<strong>${b.name}</strong> is a genuine strength (${Math.round((b.avg/4)*100)}%). Use this as a foundation to demonstrate the value of a more strategic learning function to senior stakeholders.`});});
+  bottom.forEach(b=>{if(b.avg<2.5) insights.push({type:'gap',text:`<strong>${b.name}</strong> is a critical gap (${Math.round((b.avg/4)*100)}%). CRF's research identifies this as one of the building blocks that most directly affects whether learning is seen as a business driver or a support service.`});});
+  if(genAvg<2) insights.push({type:'opp',text:`<strong>Generative learning is significantly under-invested.</strong> Even small investments here — action learning, strategy jams, co-creation sessions — can shift how the function is perceived and deliver disproportionate strategic value.`});
+  else insights.push({type:'opp',text:`<strong>Your biggest near-term opportunity</strong> is to strengthen <strong>${bottom[0].name}</strong>. A focused effort here would likely have an outsized effect on overall ecosystem effectiveness and stakeholder perception.`});
+  return{narrative,insights};
+}
+
+function submitToSheet(blockScores){
+  if(!WEBHOOK) return;
+  const payload={timestamp:new Date().toISOString(),org:S.org,context:S.context,matAns:S.matAns,blockScores:{}};
+  blockScores.forEach(b=>{payload.blockScores[b.id]=parseFloat(b.avg.toFixed(2));});
+  fetch(WEBHOOK,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+function resultsHTML(){
+  const blockScores=BLOCKS.map(b=>{
+    const scores=b.questions.map((_,i)=>S.ans[`${b.id}_${i}`]||1);
+    return{id:b.id,name:b.name,avg:scores.reduce((a,v)=>a+v,0)/scores.length};
   });
-
-  document.getElementById("btn-back").style.visibility = (current === 0) ? "hidden" : "visible";
-  document.getElementById("btn-next").textContent = (current === QUESTIONS.length-1) ? "See my result" : "Next";
-  document.getElementById("btn-next").disabled = (answers[current] === null);
+  const matScores={ip:S.matAns.ip||1,ig:S.matAns.ig||1,op:S.matAns.op||1,og:S.matAns.og||1};
+  const{narrative,insights}=generateInsights(blockScores,matScores);
+  submitToSheet(blockScores);
+  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  return `<div>
+    <div class="r-header">
+      <div class="r-title">Your Learning Ecosystem Diagnostic</div>
+      <div class="r-org">${S.org} &nbsp;·&nbsp; ${today}</div>
+    </div>
+    <div class="sec-title">CRF Learning Matrix — Where your focus sits today</div>
+    <div class="matrix-grid">
+      ${[{id:'op',l:'Organisational / Productive',d:'Teams improving collective efficiency and productivity.'},{id:'og',l:'Organisational / Generative',d:'Using collective wisdom to develop new solutions and challenge assumptions.'}].map(x=>`<div class="mc ${cellCls(matScores[x.id])}"><div class="mc-title">${x.l}</div><div class="mc-desc">${x.d}</div><span class="mc-badge">${cellBadge(matScores[x.id])}</span></div>`).join('')}
+      ${[{id:'ip',l:'Individual / Productive',d:'Learning to improve individual performance in existing roles.'},{id:'ig',l:'Individual / Generative',d:'Helping individuals develop new capabilities and strategies.'}].map(x=>`<div class="mc ${cellCls(matScores[x.id])}"><div class="mc-title">${x.l}</div><div class="mc-desc">${x.d}</div><span class="mc-badge">${cellBadge(matScores[x.id])}</span></div>`).join('')}
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;padding:0 2px"><span>Productive →</span><span>← Generative</span></div>
+    <div style="font-size:11px;color:#aaa;margin-top:6px;margin-bottom:4px">Source: CRF Learning – The Foundation for Agility and Sustainable Performance, 2017</div>
+    <div class="sec-title">Ecosystem Building Block Scores</div>
+    ${blockScores.map(b=>{const p=Math.round((b.avg/4)*100);return`<div class="score-row">
+      <div class="score-meta"><span class="score-name">${b.name}</span><span style="font-weight:700;color:${p>=65?'#00A88A':p>=40?'#F5A800':'#e07070'}">${p}%</span></div>
+      <div class="bar-bg"><div class="bar-fill ${barCls(p)}" style="width:${p}%"></div></div>
+    </div>`}).join('')}
+    <div class="sec-title">Diagnostic — What this means for ${S.org}</div>
+    <div class="narrative">${narrative}</div>
+    ${insights.map(i=>`<div class="insight ${i.type}"><div class="i-type ${i.type}">${i.type==='str'?'Strength':i.type==='gap'?'Gap to address':'Priority opportunity'}</div><div class="i-text">${i.text}</div></div>`).join('')}
+    <div class="submit-notice">✓ Your results have been recorded for the Etihad Rail collective view</div>
+    <div class="cta-box">
+      <div class="cta-title">Want to explore this further?</div>
+      <div class="cta-text">CRF works with HR and L&D teams across the UAE, KSA, and globally through research, programmes, and advisory support.</div>
+      <div class="cta-btns">
+        <button class="cta-btn teal" onclick="window.location.href='mailto:michael@crforum.co.uk?subject=Learning Ecosystem Diagnostic&body=Hi Michael, I completed the CRF diagnostic and would like to discuss my results. Team: ${S.org}'">Contact CRF →</button>
+        <button class="cta-btn ghost" onclick="window.print()">Print / Save as PDF</button>
+        <button class="cta-btn ghost" onclick="restartDiagnostic()">Start Again</button>
+      </div>
+    </div>
+  </div>`
 }
 
-function selectAnswer(n){
-  answers[current] = n;
-  renderQ();
-}
+function restartDiagnostic(){S={screen:'welcome',org:S.org,context:'',blockIdx:0,qIdx:0,matQIdx:0,ans:{},matAns:{}};render();}
 
-function nextQ(){
-  if(answers[current] === null) return;
-  if(current < QUESTIONS.length-1){
-    current++;
-    renderQ();
-  } else {
-    finish();
-  }
-}
-function prevQ(){
-  if(current > 0){ current--; renderQ(); }
-}
-
-function finish(){
-  var sum = answers.reduce(function(a,b){return a+b;},0);
-  var avg = sum / QUESTIONS.length;
-
-  document.getElementById("tier-name").textContent = tierFor(avg);
-  document.getElementById("overall-score").innerHTML = avg.toFixed(1) + '<small> / 5.0</small>';
-
-  /* bars */
-  var bars = document.getElementById("bars");
-  bars.innerHTML = "";
-  QUESTIONS.forEach(function(q,i){
-    var row = document.createElement("div");
-    row.className = "bar-row";
-    row.innerHTML =
-      '<div class="bar-label">'+q.block+'</div>'+
-      '<div class="bar-track"><div class="bar-fill" style="width:0"></div></div>'+
-      '<div class="bar-score">'+answers[i]+'</div>';
-    bars.appendChild(row);
-  });
-  /* animate after paint */
-  setTimeout(function(){
-    var fills = bars.querySelectorAll(".bar-fill");
-    fills.forEach(function(f,i){ f.style.width = (answers[i]/5*100) + "%"; });
-  }, 60);
-
-  /* commentary — surface the three lowest-scoring blocks */
-  var ranked = QUESTIONS.map(function(q,i){ return {q:q, score:answers[i], i:i}; })
-                        .sort(function(a,b){ return a.score - b.score; });
-  var focus = ranked.slice(0,3);
-  var comm = document.getElementById("commentary");
-  comm.innerHTML = "";
-  focus.forEach(function(item){
-    var band = item.score <= 2 ? item.q.low : (item.score <= 3 ? item.q.mid : item.q.high);
-    var div = document.createElement("div");
-    div.className = "comment";
-    div.innerHTML = '<h3>'+item.q.block+'</h3><p>'+band+'</p>';
-    comm.appendChild(div);
-  });
-
-  sendData(avg);
-  showScreen("screen-result");
-  window.scrollTo({top:0, behavior:"smooth"});
-}
-
-/* ---------- Send to Google Sheet ---------- */
-function sendData(avg){
-  var box = document.getElementById("confirm-box");
-  var txt = document.getElementById("confirm-text");
-
-  if(!WEBHOOK_URL){
-    box.classList.add("err");
-    txt.textContent = "Demo mode: no data was sent (collection link not yet configured).";
-    return;
-  }
-
-  var payload = {
-    timestamp: new Date().toISOString(),
-    name: (document.getElementById("in-name").value || "").trim(),
-    function: (document.getElementById("in-func").value || "").trim(),
-    email: (document.getElementById("in-email").value || "").trim(),
-    overall: avg.toFixed(2),
-    tier: tierFor(avg),
-    aligning_business: answers[0],
-    demonstrating_impact: answers[1],
-    connecting_to_work: answers[2],
-    designing_experience: answers[3],
-    learning_environment: answers[4],
-    technology_ai: answers[5],
-    integrating_talent: answers[6]
-  };
-
-  try{
-    fetch(WEBHOOK_URL, {
-      method:"POST",
-      mode:"no-cors",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
+function attachListeners(){
+  document.querySelectorAll('.opt[data-key]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const key=el.dataset.key,score=parseInt(el.dataset.s);
+      S.ans[key]=score;
+      document.querySelectorAll(`.opt[data-key="${key}"]`).forEach(o=>o.classList.remove('sel'));
+      el.classList.add('sel');
+      const nb=document.getElementById('nextBtn');if(nb)nb.disabled=false;
     });
-    txt.textContent = "Your response has been recorded for the Etihad Rail collective view.";
-  }catch(e){
-    box.classList.add("err");
-    txt.textContent = "Your result is shown above, but it could not be saved to the collective view. You can still print or save it.";
+  });
+  document.querySelectorAll('.opt[data-mat]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const mid=el.dataset.mat,score=parseInt(el.dataset.s);
+      S.matAns[mid]=score;
+      document.querySelectorAll(`.opt[data-mat="${mid}"]`).forEach(o=>o.classList.remove('sel'));
+      el.classList.add('sel');
+      const nb=document.getElementById('nextBtn');if(nb)nb.disabled=false;
+    });
+  });
+  const startBtn=document.getElementById('startBtn');
+  if(startBtn) startBtn.addEventListener('click',()=>{
+    const v=document.getElementById('orgName').value.trim();
+    if(!v){document.getElementById('orgErr').style.display='block';return;}
+    S.org=v;S.screen='context';render();
+  });
+  const nextBtn=document.getElementById('nextBtn');
+  if(nextBtn) nextBtn.addEventListener('click',()=>handleNext());
+  const backBtn=document.getElementById('backBtn');
+  if(backBtn) backBtn.addEventListener('click',()=>handleBack());
+}
+
+function handleNext(){
+  if(S.screen==='context'){
+    const v=document.getElementById('ctxInput');if(v)S.context=v.value;
+    S.screen='matrix';S.matQIdx=0;render();
+  } else if(S.screen==='matrix'){
+    if(S.matQIdx<MATRIX_QS.length-1){S.matQIdx++;render();}
+    else{S.screen='questions';S.blockIdx=0;S.qIdx=0;render();}
+  } else if(S.screen==='questions'){
+    const block=BLOCKS[S.blockIdx];
+    if(S.qIdx<block.questions.length-1){S.qIdx++;render();}
+    else if(S.blockIdx<BLOCKS.length-1){S.blockIdx++;S.qIdx=0;render();}
+    else{S.screen='results';render();}
   }
 }
 
-function showScreen(id){
-  var screens = document.querySelectorAll(".screen");
-  screens.forEach(function(s){ s.classList.remove("active"); });
-  document.getElementById(id).classList.add("active");
+function handleBack(){
+  if(S.screen==='context'){S.screen='welcome';render();}
+  else if(S.screen==='matrix'){
+    if(S.matQIdx>0){S.matQIdx--;render();}
+    else{S.screen='context';render();}
+  } else if(S.screen==='questions'){
+    if(S.qIdx>0){S.qIdx--;render();}
+    else if(S.blockIdx>0){S.blockIdx--;S.qIdx=BLOCKS[S.blockIdx].questions.length-1;render();}
+    else{S.screen='matrix';S.matQIdx=MATRIX_QS.length-1;render();}
+  }
 }
-
-function restart(){
-  answers = new Array(QUESTIONS.length).fill(null);
-  current = 0;
-  document.getElementById("confirm-box").classList.remove("err");
-  showScreen("screen-intro");
-  window.scrollTo({top:0, behavior:"smooth"});
-}
+render();
 </script>
 </body>
 </html>

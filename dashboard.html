@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Ecosystem Dashboard — Etihad Rail &amp; CRF</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F0F2F5;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+.shell{width:100%;max-width:880px;background:#fff;border-radius:16px;box-shadow:0 4px 32px rgba(11,31,58,0.10);overflow:hidden}
+.top-bar{background:#0B1F3A;padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.brand-group{display:flex;align-items:center;gap:14px}
+.crf-logo{font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px;font-family:Georgia,serif}
+.crf-logo span{color:#00A88A}
+.brand-divider{width:1px;height:26px;background:rgba(255,255,255,0.25)}
+/* Etihad Rail logo slot — replace contents of .er-logo with:
+   <img src="etihad-rail-logo.png" alt="Etihad Rail" style="height:26px"> */
+.er-logo{display:flex;align-items:center;gap:7px;border:1px dashed #C8788A;border-radius:7px;padding:5px 10px;color:#fff;font-weight:600;font-size:13px;background:rgba(122,30,46,0.35)}
+.er-logo small{font-weight:400;font-size:9px;opacity:.75}
+.top-tag{font-size:12px;color:#7ca3cc;font-weight:500;text-transform:uppercase;letter-spacing:0.08em}
+.content{padding:2rem}
+.head-row{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:1.25rem}
+.h-title{font-size:22px;font-weight:700;color:#0B1F3A}
+.h-sub{font-size:13px;color:#888;margin-top:2px}
+.btn{padding:9px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-teal{background:#00A88A;color:#fff}.btn-teal:hover{background:#00917a}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
+.stat{background:#F7F9FB;border:1px solid #E2E6EA;border-radius:10px;padding:1.1rem 1.25rem}
+.stat .n{font-size:32px;font-weight:800;color:#0B1F3A;line-height:1}
+.stat .n small{font-size:15px;color:#888;font-weight:600}
+.stat .l{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;margin-top:6px}
+.stat.dark{background:#0B1F3A}
+.stat.dark .n,.stat.dark .l{color:#fff}
+.stat.dark .tier{font-size:20px;font-weight:800;color:#00A88A;line-height:1.1}
+.sec-title{font-size:16px;font-weight:700;color:#0B1F3A;padding-bottom:6px;border-bottom:2px solid #F5A800;margin-bottom:1rem;margin-top:1.5rem}
+.matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.mc{border-radius:10px;padding:1rem}
+.mc-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.mc-desc{font-size:12px;line-height:1.4;margin-bottom:8px}
+.mc-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700}
+.mc-score{float:right;font-size:13px;font-weight:800;color:#0B1F3A}
+.cellClass-high{background:#e8f7f3;border:2px solid #00A88A}.cellClass-high .mc-title{color:#007a63}.cellClass-high .mc-badge{background:#00A88A;color:#fff}
+.cellClass-med{background:#fff8e6;border:2px solid #F5A800}.cellClass-med .mc-title{color:#b07a00}.cellClass-med .mc-badge{background:#F5A800;color:#fff}
+.cellClass-low{background:#f5f5f5;border:1.5px solid #ddd}.cellClass-low .mc-title{color:#888}.cellClass-low .mc-badge{background:#e0e0e0;color:#666}
+.score-row{margin-bottom:10px}
+.score-meta{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.score-name{color:#0B1F3A;font-weight:500}
+.bar-bg{background:#E8ECF0;border-radius:4px;height:9px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease}
+.bar-high{background:#00A88A}.bar-med{background:#F5A800}.bar-low{background:#e07070}
+.insight{background:#fff;border:1px solid #E2E6EA;border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:0.75rem}
+.insight.str{border-left:4px solid #00A88A}.insight.gap{border-left:4px solid #e07070}
+.i-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.i-type.str{color:#007a63}.i-type.gap{color:#c0394a}
+.i-text{font-size:14px;color:#333;line-height:1.55}
+.i-text strong{color:#0B1F3A}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tier-cell{text-align:center;border:1px solid #E2E6EA;border-radius:10px;padding:1rem 0.5rem}
+.tier-cell .c{font-size:26px;font-weight:800;color:#0B1F3A}
+.tier-cell .t{font-size:12px;color:#888;margin-top:4px;font-weight:600}
+.state{text-align:center;padding:3rem 1rem}
+.state h3{color:#0B1F3A;font-size:18px;margin-bottom:6px}
+.state p{color:#888;font-size:14px;max-width:42ch;margin:0 auto}
+.spinner{width:30px;height:30px;border:3px solid #E8ECF0;border-top-color:#00A88A;border-radius:50%;margin:0 auto 1rem;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer{text-align:center;padding:1rem;font-size:12px;color:#aaa;border-top:1px solid #f0f0f0;margin-top:1rem}
+.hidden{display:none}
+@media(max-width:560px){.stat-row{grid-template-columns:1fr}.matrix-grid{grid-template-columns:1fr}.tiers{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top-bar">
+    <div class="brand-group">
+      <div class="crf-logo">crf<span>.</span></div>
+      <div class="brand-divider"></div>
+      <!-- ===== ETIHAD RAIL LOGO SLOT — replace as in index.html ===== -->
+      <div class="er-logo">Etihad Rail<small>logo slot</small></div>
+    </div>
+    <div class="top-tag">Learning Ecosystem Dashboard</div>
+  </div>
+  <div class="content">
+    <div class="head-row">
+      <div>
+        <div class="h-title">Learning ecosystem across Etihad Rail</div>
+        <div class="h-sub" id="updated">Loading the latest results…</div>
+      </div>
+      <button class="btn btn-teal" onclick="loadData()">Refresh results</button>
+    </div>
+
+    <div class="state" id="state-loading"><div class="spinner"></div><h3>Gathering responses</h3><p>Reading the latest results from the collective view.</p></div>
+    <div class="state hidden" id="state-empty"><h3>No responses yet</h3><p>As people complete the diagnostic, the collective picture will build here. Refresh once a few responses are in.</p></div>
+    <div class="state hidden" id="state-error"><h3>Couldn't load the results</h3><p id="error-msg">The data link may not be configured yet. Check the collection URL and try refreshing.</p></div>
+
+    <div id="dashboard" class="hidden">
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="s-count">0</div><div class="l">Responses</div></div>
+        <div class="stat"><div class="n" id="s-overall">0<small>%</small></div><div class="l">Average maturity</div></div>
+        <div class="stat dark"><div class="tier" id="s-tier">—</div><div class="l">Collective stage</div></div>
+      </div>
+
+      <div class="sec-title">CRF Learning Matrix — Where Etihad Rail's focus sits</div>
+      <div class="matrix-grid" id="matrix-grid"></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;padding:0 2px"><span>Productive →</span><span>← Generative</span></div>
+      <div style="font-size:11px;color:#aaa;margin-top:6px">Average score per quadrant across all responses (1–4).</div>
+
+      <div class="sec-title">Ecosystem Building Block Scores</div>
+      <div id="block-bars"></div>
+
+      <div class="sec-title">Strongest area and biggest opportunity</div>
+      <div id="insights"></div>
+
+      <div class="sec-title">Spread of maturity stages</div>
+      <div class="tiers" id="tier-dist"></div>
+    </div>
+  </div>
+  <div class="footer">Etihad Rail &times; Corporate Research Forum &nbsp;·&nbsp; Based on <em>Creating an Effective Learning Ecosystem</em>, CRF 2026</div>
+</div>
+
+<script>
+/* Paste the SAME Google Apps Script /exec URL you used in index.html. */
+const WEBHOOK='https://script.google.com/macros/s/AKfycbz1l0M08cxYkDpsMlkJ3HUQuk8U4wXJPQn_-v-CIAbmd8TEyuR8_m52WVGOwPdfp29P/exec';
+
+const BLOCKS=[
+  {id:'align',name:'Aligning with the Business'},
+  {id:'impact',name:'Demonstrating Impact'},
+  {id:'work',name:'Connecting to Work'},
+  {id:'design',name:'Designing the Learning Experience'},
+  {id:'env',name:'Creating the Learning Environment'},
+  {id:'tech',name:'Applying Technology & AI'},
+  {id:'talent',name:'Integrating Talent Practices'}
+];
+
+function cellCls(s){return s>=3?'cellClass-high':s>=2?'cellClass-med':'cellClass-low'}
+function cellBadge(s){return s>=3?'High focus':s>=2?'Moderate':'Under-invested'}
+function barCls(p){return p>=65?'bar-high':p>=40?'bar-med':'bar-low'}
+function avgOf(rows,key){var sum=0,c=0;rows.forEach(function(r){var v=parseFloat(r[key]);if(!isNaN(v)){sum+=v;c++;}});return c?sum/c:0;}
+function stageFor(avg){return avg>=3.2?'Strategic':avg>=2.3?'Developing':'Early stage';}
+
+function show(id){
+  ['state-loading','state-empty','state-error','dashboard'].forEach(function(s){document.getElementById(s).classList.add('hidden');});
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function loadData(){
+  show('state-loading');
+  document.getElementById('updated').textContent='Loading the latest results…';
+  if(!WEBHOOK){
+    document.getElementById('error-msg').textContent="The collection URL isn't set yet. Paste your /exec link into the dashboard file and re-upload.";
+    show('state-error');return;
+  }
+  fetch(WEBHOOK,{method:'GET'})
+    .then(function(res){return res.json();})
+    .then(function(data){
+      var rows=(data&&data.responses)?data.responses:[];
+      if(rows.length===0){show('state-empty');mark();return;}
+      render(rows);show('dashboard');mark();
+    })
+    .catch(function(err){
+      document.getElementById('error-msg').textContent='Couldn\'t reach the results ('+err.message+'). If you just re-deployed the script, give it a moment and refresh.';
+      show('state-error');
+    });
+}
+function mark(){document.getElementById('updated').textContent='Last updated '+new Date().toLocaleString();}
+
+function render(rows){
+  document.getElementById('s-count').textContent=rows.length;
+
+  var blockAvg=BLOCKS.map(function(b){return{name:b.name,avg:avgOf(rows,b.id)};});
+  var overall=blockAvg.reduce(function(a,b){return a+b.avg;},0)/blockAvg.length;
+  document.getElementById('s-overall').innerHTML=Math.round((overall/4)*100)+'<small>%</small>';
+  document.getElementById('s-tier').textContent=stageFor(overall);
+
+  /* aggregate matrix — same layout as the diagnostic */
+  var mat={ip:avgOf(rows,'ip'),ig:avgOf(rows,'ig'),op:avgOf(rows,'op'),og:avgOf(rows,'og')};
+  var cells=[
+    {id:'op',l:'Organisational / Productive',d:'Teams improving collective efficiency and productivity.'},
+    {id:'og',l:'Organisational / Generative',d:'Using collective wisdom to develop new solutions and challenge assumptions.'},
+    {id:'ip',l:'Individual / Productive',d:'Learning to improve individual performance in existing roles.'},
+    {id:'ig',l:'Individual / Generative',d:'Helping individuals develop new capabilities and strategies.'}
+  ];
+  document.getElementById('matrix-grid').innerHTML=cells.map(function(x){
+    var s=mat[x.id];
+    return '<div class="mc '+cellCls(s)+'"><div class="mc-title">'+x.l+'<span class="mc-score">'+s.toFixed(1)+'</span></div><div class="mc-desc">'+x.d+'</div><span class="mc-badge">'+cellBadge(s)+'</span></div>';
+  }).join('');
+
+  /* block bars */
+  document.getElementById('block-bars').innerHTML=blockAvg.map(function(b){
+    var p=Math.round((b.avg/4)*100);
+    return '<div class="score-row"><div class="score-meta"><span class="score-name">'+b.name+'</span><span style="font-weight:700;color:'+(p>=65?'#00A88A':p>=40?'#F5A800':'#e07070')+'">'+p+'%</span></div><div class="bar-bg"><div class="bar-fill '+barCls(p)+'" style="width:'+p+'%"></div></div></div>';
+  }).join('');
+
+  /* strongest / weakest */
+  var sorted=blockAvg.slice().sort(function(a,b){return b.avg-a.avg;});
+  var strong=sorted[0],weak=sorted[sorted.length-1];
+  document.getElementById('insights').innerHTML=
+    '<div class="insight str"><div class="i-type str">Strongest area</div><div class="i-text"><strong>'+strong.name+'</strong> is the highest-scoring building block across Etihad Rail at '+Math.round((strong.avg/4)*100)+'%.</div></div>'+
+    '<div class="insight gap"><div class="i-type gap">Biggest opportunity</div><div class="i-text"><strong>'+weak.name+'</strong> is the lowest at '+Math.round((weak.avg/4)*100)+'% — the clearest collective focus for development.</div></div>';
+
+  /* stage distribution */
+  var stages={'Early stage':0,'Developing':0,'Strategic':0};
+  rows.forEach(function(r){
+    var sum=0,c=0;
+    BLOCKS.forEach(function(b){var v=parseFloat(r[b.id]);if(!isNaN(v)){sum+=v;c++;}});
+    if(c){stages[stageFor(sum/c)]++;}
+  });
+  document.getElementById('tier-dist').innerHTML=['Early stage','Developing','Strategic'].map(function(t){
+    return '<div class="tier-cell"><div class="c">'+stages[t]+'</div><div class="t">'+t+'</div></div>';
+  }).join('');
+}
+
+loadData();
+</script>
+</body>
+</html>
